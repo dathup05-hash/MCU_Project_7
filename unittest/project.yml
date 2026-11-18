@@ -1,0 +1,87 @@
+# =============================================================================
+#  Ceedling project: unit test cho mcu-project (chay tren may tinh, gcc)
+#  Chay:  cd unittest  ->  ceedling test:all    (hoac run_tests.bat)
+#
+#  - Unity : framework assert (TEST_ASSERT_EQUAL...)
+#  - CMock : tu sinh "mock" tu file header. Test #include "mock_hal_gpio.h"
+#            thi Ceedling tu tao ban gia cua hal_gpio.h de kiem tra cac lan goi.
+# =============================================================================
+---
+:project:
+  :name: "mcu-project unit tests"
+  :which_ceedling: gem
+  :ceedling_version: 1.2.2
+  :use_mocks: TRUE
+  :use_test_preprocessor: :none
+  :use_backtrace: :simple
+  :build_root: build
+  :test_file_prefix: test_
+  :default_tasks:
+    - test:all
+  :test_threads: 4
+  :compile_threads: 4
+  :release_build: FALSE
+
+:plugins:
+  :enabled:
+    - report_tests_pretty_stdout
+
+:extension:
+  :executable: .exe
+
+:paths:
+  :test:
+    - +:test/**
+    - -:test/support
+  # Code that unit test: chi link file .c ung voi header ma file test #include
+  :source:
+    - ../app/src
+    - ../bsp
+  # Thu tu quan trong: test/support (chua stm32f10x.h GIA) phai dung truoc
+  :include:
+    - test/support
+    - ../app/inc
+    - ../bsp
+    - ../hal/inc
+  :support:
+    - test/support
+
+:defines:
+  :test:
+    - TEST
+    - UNIT_TEST
+
+:flags:
+  :test:
+    :compile:
+      :*:
+        - -std=gnu99
+        - -Wall
+        - -Wextra
+        - -Wno-unused-parameter
+
+:cmock:
+  :mock_prefix: mock_
+  :when_no_prototypes: :warn
+  :enforce_strict_ordering: true
+  :fail_on_unexpected_calls: true
+  :callback_include_count: true
+  :callback_after_arg_check: false
+  # Con tro (vd GPIO_TypeDef *port) so sanh DIA CHI, khong so sanh noi dung
+  :when_ptr: :compare_ptr
+  :plugins:
+    - :ignore
+    - :ignore_arg
+    - :expect_any_args
+    - :callback
+    - :return_thru_ptr
+  :treat_as:
+    uint8_t:  HEX8
+    uint16_t: HEX16
+    uint32_t: UINT32
+    int16_t:  INT16
+
+:unity:
+  :defines:
+    - UNITY_EXCLUDE_FLOAT
+...
